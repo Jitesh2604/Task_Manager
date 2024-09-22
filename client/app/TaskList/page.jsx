@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
+import { TASK_STATUS } from '@/lib/utils';
 
 const priorityColors = {
   Low: "bg-blue-100 text-blue-800",
@@ -51,7 +52,7 @@ export default function TaskManager() {
   const [tasks, setTasks] = useState([]);
   const [accessToken, setAccessToken ] = useState()
   const router = useRouter()
-  const [completed, setCompleted] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
   const [todo, setTodo] = useState([]);
   const [inProgress, setInProgress] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
@@ -62,41 +63,39 @@ export default function TaskManager() {
       status: "To Do",
     });
     const [isAddingTask, setIsAddingTask] = useState(false);
-    const [sortCriterion, setSortCriterion] = useState("");
+    const [filters, setFilters] = useState({status: "All", priority: "All"})
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedToken = sessionStorage.getItem("token");
+      const storedToken = JSON.parse(sessionStorage.getItem("token"));
       if (storedToken) {
-        setAccessToken(JSON.parse(storedToken));
+        setAccessToken(storedToken);
+        getData(storedToken);
       }
     }
+    }, []);
 
-    const getData = async () => {
-        try {
-          const response = await fetch("http://localhost:8080/api/tasks", {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
-          if (!response.ok) {
-            throw new Error("Failed to fetch tasks");
-          }
-  
-          const data = await response.json();
-          console.log(data);
-  
-          setTasks(data);
-          setCompleted(data.filter((task) => task.status === "Completed"));
-          setInProgress(data.filter((task) => task.status === "In Progress"));
-          setTodo(data.filter((task) => task.status === "To Do"));
-        } catch (err) {
-          console.error("Error fetching tasks:", err);
+    const getData = async (token) => {
+      try {
+        const response = await fetch("http://localhost:8080/api/tasks", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch tasks");
         }
-      };
-      getData();
-    }, [accessToken]);
+
+        const data = await response.json();
+        console.log(data);
+
+        setTasks(data);
+        setFilteredTasks(data)
+      } catch (err) {
+        console.error("Error fetching tasks:", err);
+      }
+    };
 
     const addTask = async () => {
       try {
@@ -239,6 +238,29 @@ export default function TaskManager() {
       router.push("/KanbanBoard")
     }
 
+    const selectStatus = (val) => {
+      setFilters({...filters, status: val})
+      // filterTasks("status", val)
+    }
+    // const filterTasks = (filterType, filterVal) => {
+    //   // if (filterVal == "All") 
+    //   const filteredTasks = tasks.filter((task) => task[filterType] == filterVal)
+    //   setFilteredTasks(filteredTasks)
+    // }
+    const selectPriority = (val) => {
+      setFilters({...filters, priority: val})
+      // filterTasks("priority", val)
+    }
+
+  useEffect(()=>{
+    const filteredTasks = tasks.filter(task => {
+      const statusMatches = filters.status === 'All' || task.status === filters.status;
+      const priorityMatches = filters.priority === 'All' || task.priority === filters.priority;
+      return statusMatches && priorityMatches;
+    })
+    setFilteredTasks(filteredTasks)
+  },[filters])
+
   return (<div className="min-h-screen bg-gray-900 text-white p-8">
     <div className="flex justify-between items-center mb-8 mt-9">
         <h1 className="text-3xl font-bold">Task Manager</h1>
@@ -269,22 +291,19 @@ export default function TaskManager() {
       <CardContent>
         <div className="space-y-4">
           <div className="flex flex-wrap gap-4">
-            {/* <Input
-              placeholder="Search tasks..."
-              className="flex-grow"
-            /> */}
-            <Select>
+            
+            <Select onValueChange={selectStatus}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All">All Statuses</SelectItem>
-                <SelectItem value="Todo">Todo</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value={TASK_STATUS.todos}>Todo</SelectItem>
+                <SelectItem value={TASK_STATUS.inprogress}>In Progress</SelectItem>
+                <SelectItem value={TASK_STATUS.completed}>Completed</SelectItem>
               </SelectContent>
             </Select>
-            <Select>
+            <Select onValueChange={selectPriority}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by priority" />
               </SelectTrigger>
@@ -295,24 +314,15 @@ export default function TaskManager() {
                 <SelectItem value="High">High</SelectItem>
               </SelectContent>
             </Select>
-            <Select onValueChange={handleSortChange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="title">Title</SelectItem>
-                <SelectItem value="priority">Priority</SelectItem>
-                <SelectItem value="status">Status</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setIsAddingTask(true)}>
+            
+            <Button variant={true}  onClick={() => setIsAddingTask(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Task
             </Button>
           </div>
           <Dialog>
           <ul className="space-y-4">
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <li key={task._id} className="border rounded-lg p-4 shadow-sm">
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
@@ -437,47 +447,7 @@ export default function TaskManager() {
               </li>
             ))}
           </ul>
-          </Dialog>    
-          {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {tasks.map((task) => (
-              <Card key={task._id}>
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">
-                    {task.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm text-gray-500">
-                      {task.description}
-                    </div>
-                    <div className="flex gap-2">
-                      <Badge className={`${priorityColors[task.priority]}`}>
-                        {task.priority}
-                      </Badge>
-                      <Badge className={`${statusColors[task.status]}`}>
-                        {task.status}
-                      </Badge>
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <Button size="sm" onClick={() => handleEditTask(task)}>
-                        <Pencil className="mr-1 h-4 w-4" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteTask(task._id)}
-                      >
-                        <Trash2 className="mr-1 h-4 w-4" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div> */}
+          </Dialog>
         </div> 
       </CardContent>
     </Card>

@@ -10,3 +10,4 @@ export const TASK_STATUS = {
   completed: "Completed",
   inprogress: "In Progress"
 }
+
