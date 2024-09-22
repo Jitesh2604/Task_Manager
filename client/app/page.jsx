@@ -1,6 +1,5 @@
 "use client"
 import React, { useEffect } from 'react';
-import TaskManager from "@/app/TaskList/page";
 import { useRouter } from "next/navigation";
 
 const Home = () => {
@@ -9,17 +8,11 @@ const Home = () => {
   useEffect(() => {
     const storedToken = sessionStorage.getItem("token");
     if (!storedToken) {
-      router.push("/Signin");
+      router.push("/signin");
     } else {
-      router.push("/TaskList"); 
+      router.push("/tasklist"); 
     }
   }, [router]);
-
-  // return (
-  //   <div>
-  //     <TaskManager />
-  //   </div>
-  // );
 }
 
 export default Home;

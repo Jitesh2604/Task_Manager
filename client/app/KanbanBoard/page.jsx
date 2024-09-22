@@ -132,7 +132,7 @@ export default function TaskManager() {
   const handleLogout = () => {
     sessionStorage.removeItem("token");
     setAccessTokenObj(null);
-    router.push("/Signin");
+    router.push("/signin");
   };
 
   return (
@@ -143,7 +143,7 @@ export default function TaskManager() {
           <Button
             variant="destructive"
             className="text-white border-gray-700"
-            onClick={() => router.push("/TaskList")}
+            onClick={() => router.push("/tasklist")}
           >
             Task List
           </Button>

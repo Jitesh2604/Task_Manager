@@ -111,13 +111,6 @@ export default function TaskManager() {
         if (response.ok) {
           const addedTask = await response.json();
           setTasks((prevTasks) => [...prevTasks, addedTask]);
-          if (addedTask.status === "To Do") {
-            setTodo((prev) => [...prev, addedTask]);
-          } else if (addedTask.status === "In Progress") {
-            setInProgress((prev) => [...prev, addedTask]);
-          } else if (addedTask.status === "Completed") {
-            setCompleted((prev) => [...prev, addedTask]);
-          }
           setNewTask({
             title: "",
             description: "",
@@ -152,15 +145,6 @@ export default function TaskManager() {
           setTasks((prevTasks) =>
             prevTasks.map((task) => (task._id === taskId ? newTask : task))
           );
-          setCompleted((prev) =>
-            prev.map((task) => (task._id === taskId ? newTask : task))
-          );
-          setInProgress((prev) =>
-            prev.map((task) => (task._id === taskId ? newTask : task))
-          );
-          setTodo((prev) =>
-            prev.map((task) => (task._id === taskId ? newTask : task))
-          );
           setEditingTask(null);
         } else {
           throw new Error("Failed to update task");
@@ -187,9 +171,6 @@ export default function TaskManager() {
           setTasks((prevTasks) =>
             prevTasks.filter((task) => task._id !== taskId)
           );
-          setCompleted((prev) => prev.filter((task) => task._id !== taskId));
-          setInProgress((prev) => prev.filter((task) => task._id !== taskId));
-          setTodo((prev) => prev.filter((task) => task._id !== taskId));
         } else {
           throw new Error("Failed to delete task");
         }
@@ -231,11 +212,11 @@ export default function TaskManager() {
     const handleLogout = () => {
       sessionStorage.removeItem("token");
       setAccessToken(null);
-      router.push("/Signin");
+      router.push("/signin");
     };
 
     const handleKanban = () => {
-      router.push("/KanbanBoard")
+      router.push("/kanbanboard")
     }
 
     const selectStatus = (val) => {
@@ -259,7 +240,7 @@ export default function TaskManager() {
       return statusMatches && priorityMatches;
     })
     setFilteredTasks(filteredTasks)
-  },[filters])
+  },[filters, tasks])
 
   return (<div className="min-h-screen bg-gray-900 text-white p-8">
     <div className="flex justify-between items-center mb-8 mt-9">
@@ -339,7 +320,7 @@ export default function TaskManager() {
                   <p className="text-sm text-gray-600">{task.description}</p>
                   <div className="flex justify-end space-x-2 mt-2">
                   <Dialog>
-            <DialogTrigger asChild>
+            <DialogTrigger asChild >
               <Button
                 variant="outline"
                 size="sm"
@@ -349,7 +330,7 @@ export default function TaskManager() {
                 Edit
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            {/* <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Edit Task</DialogTitle>
                 <DialogDescription>
@@ -432,7 +413,7 @@ export default function TaskManager() {
                   Save changes
                 </Button>
               </DialogFooter>
-            </DialogContent>
+            </DialogContent> */}
           </Dialog>
           <Button
             variant="destructive"
@@ -537,7 +518,7 @@ export default function TaskManager() {
       </DialogContent>
     </Dialog>
 
-    <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
+    <Dialog open={editingTask} onOpenChange={setEditingTask}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>

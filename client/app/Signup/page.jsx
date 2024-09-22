@@ -50,7 +50,7 @@ export default function SignUp() {
       setSuccess(true);
 
       setTimeout(() => {
-        router.push("/Signin");
+        router.push("/signin");
       }, 2000);
     } catch (err) {
       setError(err.message);
@@ -131,7 +131,7 @@ export default function SignUp() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <a href="/Signin" className="text-blue-600 hover:underline">
+            <a href="/signin" className="text-blue-600 hover:underline">
               Sign in
             </a>
           </p>
