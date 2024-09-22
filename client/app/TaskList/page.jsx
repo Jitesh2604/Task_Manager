@@ -77,7 +77,7 @@ export default function TaskManager() {
 
     const getData = async (token) => {
       try {
-        const response = await fetch("http://localhost:8080/api/tasks", {
+        const response = await fetch("https://task-manager-1hqr.onrender.com/api/tasks", {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -99,7 +99,7 @@ export default function TaskManager() {
 
     const addTask = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/tasks", {
+        const response = await fetch("https://task-manager-1hqr.onrender.com/api/tasks", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -129,7 +129,7 @@ export default function TaskManager() {
     const updateTask = async (taskId, updatedTask) => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/tasks/${taskId}`,
+          `https://task-manager-1hqr.onrender.com/api/tasks/${taskId}`,
           {
             method: "PUT",
             headers: {
@@ -157,7 +157,7 @@ export default function TaskManager() {
     const deleteTask = async (taskId) => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/tasks/${taskId}`,
+          `https://task-manager-1hqr.onrender.com/api/tasks/${taskId}`,
           {
             method: "DELETE",
             headers: {

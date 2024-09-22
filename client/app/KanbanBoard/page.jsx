@@ -41,7 +41,7 @@ export default function TaskManager() {
       if (!accessTokenObj) return;
 
       try {
-        const response = await fetch("http://localhost:8080/api/tasks", {
+        const response = await fetch("https://task-manager-1hqr.onrender.com/api/tasks", {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessTokenObj}`,
@@ -109,7 +109,7 @@ export default function TaskManager() {
   const updateTask = async (taskId, updatedTask) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/tasks/${taskId}`,
+        `https://task-manager-1hqr.onrender.com/api/tasks/${taskId}`,
         {
           method: "PUT",
           headers: {
